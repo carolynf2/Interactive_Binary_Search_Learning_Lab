@@ -1,0 +1,2219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Binary Search Learning Lab</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 10px;
+            padding: 20px;
+            background: #f8f9fa;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .mode-btn {
+            padding: 12px 24px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .mode-btn.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .controls {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .control-group:last-child {
+            margin-bottom: 0;
+        }
+
+        label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        input[type="number"], input[type="text"] {
+            padding: 8px 12px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+            width: 150px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-success {
+            background: #10b981;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-warning {
+            background: #f59e0b;
+        }
+
+        .btn-warning:hover {
+            background: #d97706;
+        }
+
+        .array-container {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .array-title {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .array-display {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            min-height: 80px;
+            align-items: center;
+        }
+
+        .array-element {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 3px solid #ddd;
+            border-radius: 8px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .array-element:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .array-element.current {
+            background: #fbbf24;
+            border-color: #f59e0b;
+            transform: scale(1.15);
+            box-shadow: 0 4px 16px rgba(245, 158, 11, 0.4);
+        }
+
+        .array-element.in-range {
+            background: #dbeafe;
+            border-color: #3b82f6;
+        }
+
+        .array-element.out-range {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+            opacity: 0.5;
+        }
+
+        .array-element.found {
+            background: #86efac;
+            border-color: #10b981;
+            animation: pulse 0.6s ease-in-out;
+        }
+
+        .array-element.user-click {
+            background: #fca5a5;
+            border-color: #ef4444;
+        }
+
+        .array-element .index-label {
+            position: absolute;
+            bottom: -20px;
+            font-size: 0.75em;
+            color: #666;
+        }
+
+        .array-element .pointer-label {
+            position: absolute;
+            top: -25px;
+            font-size: 0.85em;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .pointer-left {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .pointer-right {
+            background: #fce7f3;
+            color: #9f1239;
+        }
+
+        .pointer-mid {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1.15); }
+            50% { transform: scale(1.25); }
+        }
+
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .code-display {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #334155;
+        }
+
+        .code-tabs {
+            display: flex;
+            gap: 10px;
+        }
+
+        .code-tab {
+            padding: 6px 12px;
+            background: #334155;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s;
+        }
+
+        .code-tab.active {
+            background: #667eea;
+        }
+
+        .code-content {
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+
+        .code-line {
+            padding: 2px 0;
+        }
+
+        .code-line.highlight {
+            background: rgba(102, 126, 234, 0.3);
+            border-left: 3px solid #667eea;
+            padding-left: 10px;
+        }
+
+        .keyword { color: #c792ea; }
+        .function { color: #82aaff; }
+        .number { color: #f78c6c; }
+        .comment { color: #676e95; font-style: italic; }
+        .string { color: #c3e88d; }
+
+        .comparison-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .comparison-panel {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .info-box {
+            background: #e0e7ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .info-box.warning {
+            background: #fef3c7;
+            border-left-color: #f59e0b;
+        }
+
+        .info-box.success {
+            background: #d1fae5;
+            border-left-color: #10b981;
+        }
+
+        .info-box.error {
+            background: #fee2e2;
+            border-left-color: #ef4444;
+        }
+
+        .chart-container {
+            margin: 20px 0;
+            padding: 20px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .playback-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .speed-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .speed-control input[type="range"] {
+            width: 150px;
+        }
+
+        .auto-play-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .auto-play-toggle:hover {
+            border-color: #667eea;
+        }
+
+        .auto-play-toggle.enabled {
+            background: #e0e7ff;
+            border-color: #667eea;
+        }
+
+        .auto-play-toggle input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .auto-play-toggle label {
+            margin: 0;
+            cursor: pointer;
+            font-size: 0.95em;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* Algorithm Selection Tabs */
+        .algorithm-tabs {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+
+        .algorithm-tab {
+            padding: 12px 24px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .algorithm-tab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .algorithm-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        /* Visualization Mode Toggle */
+        .viz-mode-toggle {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+        .radio-option:hover {
+            background: #f8f9fa;
+        }
+
+        .radio-option input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .radio-option span {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .radio-option input[type="radio"]:checked + span {
+            color: #667eea;
+        }
+
+        /* Sort Statistics Panel */
+        .sort-stats-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .stat-card-small {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .stat-label-small {
+            font-size: 0.85em;
+            color: #666;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .stat-value-small {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        /* Comparison Mode Container */
+        .sort-comparison-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .sort-comparison-panel {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .sort-comparison-panel h4 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .sort-comparison-array {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            justify-content: center;
+            min-height: 60px;
+            margin: 10px 0;
+        }
+
+        .comparison-mini-element {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .winner-badge {
+            display: inline-block;
+            background: #10b981;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-left: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .comparison-container {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .array-element {
+                width: 50px;
+                height: 50px;
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔍 Interactive Binary Search Learning Lab</h1>
+            <p class="subtitle">Master binary search through active, hands-on learning</p>
+        </header>
+
+        <div class="mode-selector">
+            <button class="mode-btn active" onclick="setMode('manual')">🎮 Manual Challenge</button>
+            <button class="mode-btn" onclick="setMode('visualization')">👁️ Visualization</button>
+            <button class="mode-btn" onclick="setMode('comparison')">⚡ Algorithm Race</button>
+            <button class="mode-btn" onclick="setMode('analytics')">📊 Performance Analytics</button>
+        </div>
+
+        <div class="content">
+            <!-- Controls -->
+            <div class="controls">
+                <div class="control-group">
+                    <label>Array Size:</label>
+                    <input type="number" id="arraySize" value="15" min="5" max="50">
+                    <button onclick="generateArray()">Generate Random Array</button>
+                    <button onclick="generateCustomArray()">Custom Array</button>
+                </div>
+                <div class="control-group">
+                    <label>Target Value:</label>
+                    <input type="number" id="targetValue" value="42">
+                    <button onclick="setRandomTarget()">Random Target</button>
+                    <button class="btn-success" onclick="startSearch()">Start Search</button>
+                    <button class="btn-danger" onclick="resetSearch()">Reset</button>
+                </div>
+            </div>
+
+            <!-- Manual Challenge Mode -->
+            <div id="manualMode" class="mode-content">
+                <div class="info-box">
+                    <strong>🎯 Your Mission:</strong> Find the target number by clicking on array elements.
+                    Try to minimize the number of clicks! Think about how you would efficiently narrow down the search.
+                </div>
+                <div class="stats-panel">
+                    <div class="stat-card">
+                        <div class="stat-label">Your Clicks</div>
+                        <div class="stat-value" id="userClicks">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Optimal Clicks</div>
+                        <div class="stat-value" id="optimalClicks">-</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Efficiency</div>
+                        <div class="stat-value" id="efficiency">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Visualization Mode -->
+            <div id="visualizationMode" class="mode-content hidden">
+                <!-- Algorithm Selection Tabs -->
+                <div class="algorithm-tabs">
+                    <button class="algorithm-tab" id="bubbleTab" onclick="selectAlgorithm('bubble')">
+                        🫧 Bubble Sort
+                    </button>
+                    <button class="algorithm-tab active" id="quickTab" onclick="selectAlgorithm('quick')">
+                        ⚡ Quick Sort
+                    </button>
+                    <button class="algorithm-tab" id="mergeTab" onclick="selectAlgorithm('merge')">
+                        🔀 Merge Sort
+                    </button>
+                </div>
+
+                <!-- Visualization Mode Toggle -->
+                <div class="viz-mode-toggle">
+                    <label class="radio-option">
+                        <input type="radio" name="vizMode" value="individual" checked onchange="setVisualizationSubMode('individual')">
+                        <span>Individual Mode</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="vizMode" value="comparison" onchange="setVisualizationSubMode('comparison')">
+                        <span>Side-by-Side Comparison</span>
+                    </label>
+                </div>
+
+                <!-- Statistics Panel (for individual mode) -->
+                <div id="sortStatsPanel" class="sort-stats-panel">
+                    <div class="stat-card-small">
+                        <div class="stat-label-small">Comparisons</div>
+                        <div class="stat-value-small" id="sortComparisons">0</div>
+                    </div>
+                    <div class="stat-card-small">
+                        <div class="stat-label-small">Operations</div>
+                        <div class="stat-value-small" id="sortOperations">0</div>
+                    </div>
+                    <div class="stat-card-small">
+                        <div class="stat-label-small">Time Complexity</div>
+                        <div class="stat-value-small" id="sortComplexity">-</div>
+                    </div>
+                    <div class="stat-card-small">
+                        <div class="stat-label-small">Status</div>
+                        <div class="stat-value-small" id="sortStatus">Ready</div>
+                    </div>
+                </div>
+
+                <div class="playback-controls">
+                    <button onclick="stepBackward()">⏮ Step Back</button>
+                    <button id="playPauseBtn" onclick="togglePlayPause()">▶️ Play</button>
+                    <button onclick="stepForward()">Step Forward ⏭</button>
+                    <div class="speed-control">
+                        <label>Speed:</label>
+                        <input type="range" id="speedControl" min="1" max="10" value="5" oninput="updateSpeed()">
+                        <span id="speedLabel">1x</span>
+                    </div>
+                    <div class="auto-play-toggle" id="autoPlayToggle" onclick="toggleAutoPlay()">
+                        <input type="checkbox" id="autoPlayCheckbox" onclick="event.stopPropagation(); toggleAutoPlay()">
+                        <label for="autoPlayCheckbox">Auto-play on start</label>
+                    </div>
+                </div>
+                <div class="info-box" id="stepInfo">
+                    Click "Start Search" to begin the visualization
+                </div>
+            </div>
+
+            <!-- Comparison Mode -->
+            <div id="comparisonMode" class="mode-content hidden">
+                <div class="info-box">
+                    <strong>⚡ Algorithm Race:</strong> Watch binary search compete against linear search in real-time!
+                </div>
+                <div class="comparison-container">
+                    <div class="comparison-panel">
+                        <h3>🚀 Binary Search</h3>
+                        <div class="stat-card">
+                            <div class="stat-label">Comparisons</div>
+                            <div class="stat-value" id="binaryComparisons">0</div>
+                        </div>
+                        <div id="binaryArray" class="array-display"></div>
+                    </div>
+                    <div class="comparison-panel">
+                        <h3>🐌 Linear Search</h3>
+                        <div class="stat-card">
+                            <div class="stat-label">Comparisons</div>
+                            <div class="stat-value" id="linearComparisons">0</div>
+                        </div>
+                        <div id="linearArray" class="array-display"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics Mode -->
+            <div id="analyticsMode" class="mode-content hidden">
+                <div class="info-box">
+                    <strong>📊 Performance Analysis:</strong> Understanding Time Complexity
+                </div>
+                <div class="chart-container">
+                    <canvas id="performanceChart"></canvas>
+                </div>
+                <div class="info-box success">
+                    <strong>Big O Notation:</strong><br>
+                    • Binary Search: O(log₂n) - Doubles efficiency with each comparison<br>
+                    • Linear Search: O(n) - Checks each element one by one<br>
+                    • For 1000 elements: Binary needs ~10 comparisons, Linear needs ~500 on average!
+                </div>
+            </div>
+
+            <!-- Array Display -->
+            <div class="array-container">
+                <div class="array-title">Sorted Array <span id="arrayInfo"></span></div>
+                <div id="arrayDisplay" class="array-display"></div>
+            </div>
+
+            <!-- Code Display -->
+            <div class="code-display">
+                <div class="code-header">
+                    <div class="code-tabs">
+                        <div class="code-tab active" onclick="showCode('iterative')">Iterative</div>
+                        <div class="code-tab" onclick="showCode('recursive')">Recursive</div>
+                        <div class="code-tab" onclick="showCode('pseudocode')">Pseudocode</div>
+                    </div>
+                </div>
+                <div id="codeContent" class="code-content"></div>
+            </div>
+
+            <!-- Edge Cases Section -->
+            <div class="controls">
+                <div class="control-group">
+                    <label><strong>🔬 Test Edge Cases:</strong></label>
+                    <button class="btn-warning" onclick="testUnsorted()">Unsorted Array</button>
+                    <button class="btn-warning" onclick="testNotFound()">Target Not Found</button>
+                    <button class="btn-warning" onclick="testDuplicates()">Duplicates</button>
+                    <button class="btn-warning" onclick="testBoundaries()">Boundary Values</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global state
+        let currentArray = [];
+        let targetValue = 42;
+        let currentMode = 'manual';
+        let userClickCount = 0;
+        let searchSteps = [];
+        let currentStep = 0;
+        let isPlaying = false;
+        let playInterval = null;
+        let animationSpeed = 1000;
+        let manualSearchActive = false;
+        let chart = null;
+        let autoPlayEnabled = false;
+        let currentPhase = null; // 'shuffle', 'sort', 'search'
+        let allPhaseSteps = []; // Combined steps from all phases
+        let phaseTransitions = {}; // Track where each phase starts/ends
+
+        // Sorting algorithm selection
+        let selectedSortAlgorithm = 'quick'; // 'bubble', 'quick', or 'merge'
+        let visualizationSubMode = 'individual'; // 'individual' or 'comparison'
+        let sortStats = {
+            bubble: { comparisons: 0, swaps: 0, passes: 0 },
+            quick: { comparisons: 0, swaps: 0, partitions: 0 },
+            merge: { comparisons: 0, moves: 0, splits: 0 }
+        };
+
+        // Code templates
+        const codeTemplates = {
+            iterative: `<span class="keyword">function</span> <span class="function">binarySearch</span>(arr, target) {
+    <span class="keyword">let</span> left = <span class="number">0</span>;
+    <span class="keyword">let</span> right = arr.length - <span class="number">1</span>;
+
+    <span class="keyword">while</span> (left <= right) {
+        <span class="keyword">let</span> mid = Math.floor((left + right) / <span class="number">2</span>);
+
+        <span class="keyword">if</span> (arr[mid] === target) {
+            <span class="keyword">return</span> mid; <span class="comment">// Found!</span>
+        }
+        <span class="keyword">else if</span> (arr[mid] < target) {
+            left = mid + <span class="number">1</span>; <span class="comment">// Search right half</span>
+        }
+        <span class="keyword">else</span> {
+            right = mid - <span class="number">1</span>; <span class="comment">// Search left half</span>
+        }
+    }
+
+    <span class="keyword">return</span> -<span class="number">1</span>; <span class="comment">// Not found</span>
+}`,
+            recursive: `<span class="keyword">function</span> <span class="function">binarySearchRecursive</span>(arr, target, left = <span class="number">0</span>, right = arr.length - <span class="number">1</span>) {
+    <span class="keyword">if</span> (left > right) {
+        <span class="keyword">return</span> -<span class="number">1</span>; <span class="comment">// Not found</span>
+    }
+
+    <span class="keyword">let</span> mid = Math.floor((left + right) / <span class="number">2</span>);
+
+    <span class="keyword">if</span> (arr[mid] === target) {
+        <span class="keyword">return</span> mid; <span class="comment">// Found!</span>
+    }
+    <span class="keyword">else if</span> (arr[mid] < target) {
+        <span class="comment">// Search right half recursively</span>
+        <span class="keyword">return</span> <span class="function">binarySearchRecursive</span>(arr, target, mid + <span class="number">1</span>, right);
+    }
+    <span class="keyword">else</span> {
+        <span class="comment">// Search left half recursively</span>
+        <span class="keyword">return</span> <span class="function">binarySearchRecursive</span>(arr, target, left, mid - <span class="number">1</span>);
+    }
+}`,
+            pseudocode: `<span class="comment">// Binary Search Algorithm - Pseudocode</span>
+
+<span class="keyword">SET</span> left pointer to <span class="number">0</span>
+<span class="keyword">SET</span> right pointer to last index
+
+<span class="keyword">WHILE</span> left <= right:
+    <span class="keyword">CALCULATE</span> middle index = (left + right) / <span class="number">2</span>
+
+    <span class="keyword">IF</span> array[middle] equals target:
+        <span class="keyword">RETURN</span> middle (found!)
+
+    <span class="keyword">IF</span> array[middle] is less than target:
+        <span class="keyword">MOVE</span> left pointer to middle + <span class="number">1</span>
+        <span class="comment">// Target must be in right half</span>
+
+    <span class="keyword">ELSE</span>:
+        <span class="keyword">MOVE</span> right pointer to middle - <span class="number">1</span>
+        <span class="comment">// Target must be in left half</span>
+
+<span class="keyword">RETURN</span> -<span class="number">1</span> (not found)`
+        };
+
+        // Initialize
+        function init() {
+            generateArray();
+            showCode('iterative');
+            updateArrayInfo();
+            updateComplexityInfo();
+        }
+
+        // Generate random sorted array
+        function generateArray() {
+            const size = parseInt(document.getElementById('arraySize').value);
+            currentArray = [];
+
+            for (let i = 0; i < size; i++) {
+                const value = Math.floor(Math.random() * 100) + 1;
+                currentArray.push(value);
+            }
+
+            currentArray.sort((a, b) => a - b);
+            resetSearch();
+            renderArray();
+            updateArrayInfo();
+        }
+
+        // Generate custom array
+        function generateCustomArray() {
+            const input = prompt("Enter numbers separated by commas (they will be sorted):");
+            if (input) {
+                currentArray = input.split(',').map(n => parseInt(n.trim())).filter(n => !isNaN(n));
+                currentArray.sort((a, b) => a - b);
+                resetSearch();
+                renderArray();
+                updateArrayInfo();
+            }
+        }
+
+        // Set random target
+        function setRandomTarget() {
+            if (currentArray.length > 0) {
+                const randomIndex = Math.floor(Math.random() * currentArray.length);
+                targetValue = currentArray[randomIndex];
+                document.getElementById('targetValue').value = targetValue;
+            }
+        }
+
+        // Update array info
+        function updateArrayInfo() {
+            const info = `(Size: ${currentArray.length}, Range: ${currentArray[0]} - ${currentArray[currentArray.length - 1]})`;
+            document.getElementById('arrayInfo').textContent = info;
+        }
+
+        // Render array
+        function renderArray(highlights = {}) {
+            const display = document.getElementById('arrayDisplay');
+            display.innerHTML = '';
+
+            currentArray.forEach((value, index) => {
+                const element = document.createElement('div');
+                element.className = 'array-element';
+                element.textContent = value;
+
+                // Add index label
+                const indexLabel = document.createElement('div');
+                indexLabel.className = 'index-label';
+                indexLabel.textContent = index;
+                element.appendChild(indexLabel);
+
+                // Apply highlights for binary search
+                if (highlights.current === index) {
+                    element.classList.add('current');
+                }
+                if (highlights.inRange && index >= highlights.left && index <= highlights.right) {
+                    element.classList.add('in-range');
+                }
+                if (highlights.outRange && (index < highlights.left || index > highlights.right)) {
+                    element.classList.add('out-range');
+                }
+                if (highlights.found === index) {
+                    element.classList.add('found');
+                }
+                if (highlights.userClicks && highlights.userClicks.includes(index)) {
+                    element.classList.add('user-click');
+                }
+
+                // Apply highlights for sorting/shuffling
+                if (highlights.swapIndices && highlights.swapIndices.includes(index)) {
+                    element.classList.add('current');
+                    element.style.background = '#fbbf24';
+                }
+                if (highlights.pivot === index) {
+                    element.classList.add('current');
+                    element.style.background = '#f97316';
+                    element.style.borderColor = '#ea580c';
+                }
+                if (highlights.comparing && highlights.comparing.includes(index)) {
+                    element.style.background = '#fef3c7';
+                    element.style.borderColor = '#f59e0b';
+                }
+                if (highlights.partitionLow !== undefined && highlights.partitionHigh !== undefined) {
+                    if (index >= highlights.partitionLow && index <= highlights.partitionHigh) {
+                        element.style.background = '#dbeafe';
+                    }
+                }
+
+                // Add pointer labels
+                if (highlights.left === index) {
+                    const pointer = document.createElement('div');
+                    pointer.className = 'pointer-label pointer-left';
+                    pointer.textContent = 'L';
+                    element.appendChild(pointer);
+                }
+                if (highlights.right === index) {
+                    const pointer = document.createElement('div');
+                    pointer.className = 'pointer-label pointer-right';
+                    pointer.textContent = 'R';
+                    element.appendChild(pointer);
+                }
+                if (highlights.mid === index) {
+                    const pointer = document.createElement('div');
+                    pointer.className = 'pointer-label pointer-mid';
+                    pointer.textContent = 'M';
+                    element.appendChild(pointer);
+                }
+
+                // Add click handler for manual mode
+                if (currentMode === 'manual' && manualSearchActive) {
+                    element.onclick = () => handleManualClick(index);
+                    element.style.cursor = 'pointer';
+                }
+
+                display.appendChild(element);
+            });
+        }
+
+        // Binary search algorithm (returns steps)
+        function binarySearchSteps(arr, target) {
+            const steps = [];
+            let left = 0;
+            let right = arr.length - 1;
+
+            while (left <= right) {
+                const mid = Math.floor((left + right) / 2);
+
+                steps.push({
+                    left,
+                    right,
+                    mid,
+                    comparison: arr[mid],
+                    action: arr[mid] === target ? 'found' : (arr[mid] < target ? 'go right' : 'go left'),
+                    message: arr[mid] === target
+                        ? `Found ${target} at index ${mid}!`
+                        : `${arr[mid]} ${arr[mid] < target ? '<' : '>'} ${target}, search ${arr[mid] < target ? 'right' : 'left'} half`
+                });
+
+                if (arr[mid] === target) {
+                    return { steps, found: true, index: mid };
+                } else if (arr[mid] < target) {
+                    left = mid + 1;
+                } else {
+                    right = mid - 1;
+                }
+            }
+
+            steps.push({
+                left,
+                right,
+                mid: -1,
+                action: 'not found',
+                message: `${target} not found in array`
+            });
+
+            return { steps, found: false, index: -1 };
+        }
+
+        // Linear search for comparison
+        function linearSearchSteps(arr, target) {
+            const steps = [];
+
+            for (let i = 0; i < arr.length; i++) {
+                steps.push({
+                    index: i,
+                    value: arr[i],
+                    found: arr[i] === target
+                });
+
+                if (arr[i] === target) {
+                    return { steps, found: true, index: i };
+                }
+            }
+
+            return { steps, found: false, index: -1 };
+        }
+
+        // Shuffle array (Fisher-Yates algorithm) with animation steps
+        function shuffleArraySteps(arr) {
+            const steps = [];
+            const workingArray = [...arr];
+
+            for (let i = workingArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+
+                steps.push({
+                    type: 'shuffle',
+                    swapIndices: [i, j],
+                    array: [...workingArray],
+                    message: `Swapping positions ${i} and ${j}`
+                });
+
+                [workingArray[i], workingArray[j]] = [workingArray[j], workingArray[i]];
+            }
+
+            steps.push({
+                type: 'shuffle',
+                swapIndices: [],
+                array: [...workingArray],
+                message: 'Shuffling complete!'
+            });
+
+            return { steps, finalArray: workingArray };
+        }
+
+        // Quick Sort with step-by-step tracking
+        function quickSortSteps(arr) {
+            const steps = [];
+            const workingArray = [...arr];
+
+            function partition(low, high) {
+                const pivot = workingArray[high];
+                const pivotIndex = high;
+
+                steps.push({
+                    type: 'sort',
+                    subtype: 'select-pivot',
+                    pivot: pivotIndex,
+                    pivotValue: pivot,
+                    low, high,
+                    array: [...workingArray],
+                    message: `Selected pivot: ${pivot} at index ${pivotIndex}`
+                });
+
+                let i = low - 1;
+
+                for (let j = low; j < high; j++) {
+                    steps.push({
+                        type: 'sort',
+                        subtype: 'compare',
+                        comparing: [j, pivotIndex],
+                        low, high,
+                        array: [...workingArray],
+                        message: `Comparing ${workingArray[j]} with pivot ${pivot}`
+                    });
+
+                    if (workingArray[j] < pivot) {
+                        i++;
+
+                        if (i !== j) {
+                            steps.push({
+                                type: 'sort',
+                                subtype: 'swap',
+                                swapIndices: [i, j],
+                                low, high,
+                                array: [...workingArray],
+                                message: `Swapping ${workingArray[i]} and ${workingArray[j]}`
+                            });
+
+                            [workingArray[i], workingArray[j]] = [workingArray[j], workingArray[i]];
+                        }
+                    }
+                }
+
+                i++;
+                if (i !== high) {
+                    steps.push({
+                        type: 'sort',
+                        subtype: 'pivot-placement',
+                        swapIndices: [i, high],
+                        low, high,
+                        array: [...workingArray],
+                        message: `Placing pivot ${pivot} at correct position ${i}`
+                    });
+
+                    [workingArray[i], workingArray[high]] = [workingArray[high], workingArray[i]];
+                }
+
+                return i;
+            }
+
+            function quickSortRecursive(low, high) {
+                if (low < high) {
+                    const pi = partition(low, high);
+
+                    steps.push({
+                        type: 'sort',
+                        subtype: 'partition-complete',
+                        partitionIndex: pi,
+                        low, high,
+                        array: [...workingArray],
+                        message: `Partition complete. Element at ${pi} is in correct position`
+                    });
+
+                    quickSortRecursive(low, pi - 1);
+                    quickSortRecursive(pi + 1, high);
+                }
+            }
+
+            if (workingArray.length > 1) {
+                quickSortRecursive(0, workingArray.length - 1);
+            }
+
+            steps.push({
+                type: 'sort',
+                subtype: 'complete',
+                array: [...workingArray],
+                message: 'Quick Sort complete! Array is now sorted'
+            });
+
+            return { steps, sortedArray: workingArray };
+        }
+
+        // Bubble Sort with step-by-step tracking
+        function bubbleSortSteps(arr) {
+            const steps = [];
+            const workingArray = [...arr];
+            const n = workingArray.length;
+
+            for (let i = 0; i < n - 1; i++) {
+                let swapped = false;
+
+                for (let j = 0; j < n - i - 1; j++) {
+                    steps.push({
+                        type: 'sort',
+                        algorithm: 'bubble',
+                        subtype: 'compare',
+                        comparing: [j, j + 1],
+                        pass: i + 1,
+                        sortedEnd: n - i,
+                        array: [...workingArray],
+                        message: `Pass ${i + 1}: Comparing ${workingArray[j]} and ${workingArray[j + 1]}`
+                    });
+
+                    if (workingArray[j] > workingArray[j + 1]) {
+                        steps.push({
+                            type: 'sort',
+                            algorithm: 'bubble',
+                            subtype: 'swap',
+                            swapIndices: [j, j + 1],
+                            pass: i + 1,
+                            sortedEnd: n - i,
+                            array: [...workingArray],
+                            message: `Swapping ${workingArray[j]} and ${workingArray[j + 1]}`
+                        });
+
+                        [workingArray[j], workingArray[j + 1]] = [workingArray[j + 1], workingArray[j]];
+                        swapped = true;
+                    }
+                }
+
+                steps.push({
+                    type: 'sort',
+                    algorithm: 'bubble',
+                    subtype: 'pass-complete',
+                    pass: i + 1,
+                    sortedEnd: n - i - 1,
+                    array: [...workingArray],
+                    message: `Pass ${i + 1} complete. Element at position ${n - i - 1} is sorted`
+                });
+
+                if (!swapped) {
+                    steps.push({
+                        type: 'sort',
+                        algorithm: 'bubble',
+                        subtype: 'complete',
+                        array: [...workingArray],
+                        message: 'No swaps needed. Bubble Sort complete!'
+                    });
+                    break;
+                }
+            }
+
+            if (steps[steps.length - 1].subtype !== 'complete') {
+                steps.push({
+                    type: 'sort',
+                    algorithm: 'bubble',
+                    subtype: 'complete',
+                    array: [...workingArray],
+                    message: 'Bubble Sort complete! Array is now sorted'
+                });
+            }
+
+            return { steps, sortedArray: workingArray };
+        }
+
+        // Merge Sort with step-by-step tracking
+        function mergeSortSteps(arr) {
+            const steps = [];
+            const workingArray = [...arr];
+
+            function merge(arr, left, mid, right, depth) {
+                const leftArr = arr.slice(left, mid + 1);
+                const rightArr = arr.slice(mid + 1, right + 1);
+
+                steps.push({
+                    type: 'sort',
+                    algorithm: 'merge',
+                    subtype: 'merge-start',
+                    merging: [left, mid, right],
+                    depth,
+                    array: [...arr],
+                    message: `Merging subarrays [${left}...${mid}] and [${mid + 1}...${right}]`
+                });
+
+                let i = 0, j = 0, k = left;
+
+                while (i < leftArr.length && j < rightArr.length) {
+                    steps.push({
+                        type: 'sort',
+                        algorithm: 'merge',
+                        subtype: 'compare',
+                        comparing: [left + i, mid + 1 + j],
+                        depth,
+                        array: [...arr],
+                        message: `Comparing ${leftArr[i]} and ${rightArr[j]}`
+                    });
+
+                    if (leftArr[i] <= rightArr[j]) {
+                        arr[k] = leftArr[i];
+                        steps.push({
+                            type: 'sort',
+                            algorithm: 'merge',
+                            subtype: 'place',
+                            placeIndex: k,
+                            placeValue: leftArr[i],
+                            depth,
+                            array: [...arr],
+                            message: `Placing ${leftArr[i]} at position ${k}`
+                        });
+                        i++;
+                    } else {
+                        arr[k] = rightArr[j];
+                        steps.push({
+                            type: 'sort',
+                            algorithm: 'merge',
+                            subtype: 'place',
+                            placeIndex: k,
+                            placeValue: rightArr[j],
+                            depth,
+                            array: [...arr],
+                            message: `Placing ${rightArr[j]} at position ${k}`
+                        });
+                        j++;
+                    }
+                    k++;
+                }
+
+                while (i < leftArr.length) {
+                    arr[k] = leftArr[i];
+                    steps.push({
+                        type: 'sort',
+                        algorithm: 'merge',
+                        subtype: 'place',
+                        placeIndex: k,
+                        placeValue: leftArr[i],
+                        depth,
+                        array: [...arr],
+                        message: `Placing remaining ${leftArr[i]} at position ${k}`
+                    });
+                    i++;
+                    k++;
+                }
+
+                while (j < rightArr.length) {
+                    arr[k] = rightArr[j];
+                    steps.push({
+                        type: 'sort',
+                        algorithm: 'merge',
+                        subtype: 'place',
+                        placeIndex: k,
+                        placeValue: rightArr[j],
+                        depth,
+                        array: [...arr],
+                        message: `Placing remaining ${rightArr[j]} at position ${k}`
+                    });
+                    j++;
+                    k++;
+                }
+
+                steps.push({
+                    type: 'sort',
+                    algorithm: 'merge',
+                    subtype: 'merge-complete',
+                    merging: [left, mid, right],
+                    depth,
+                    array: [...arr],
+                    message: `Merged [${left}...${right}]`
+                });
+            }
+
+            function mergeSortRecursive(arr, left, right, depth = 0) {
+                if (left < right) {
+                    const mid = Math.floor((left + right) / 2);
+
+                    steps.push({
+                        type: 'sort',
+                        algorithm: 'merge',
+                        subtype: 'split',
+                        splitting: [left, mid, right],
+                        depth,
+                        array: [...arr],
+                        message: `Splitting [${left}...${right}] into [${left}...${mid}] and [${mid + 1}...${right}]`
+                    });
+
+                    mergeSortRecursive(arr, left, mid, depth + 1);
+                    mergeSortRecursive(arr, mid + 1, right, depth + 1);
+                    merge(arr, left, mid, right, depth);
+                }
+            }
+
+            if (workingArray.length > 1) {
+                mergeSortRecursive(workingArray, 0, workingArray.length - 1);
+            }
+
+            steps.push({
+                type: 'sort',
+                algorithm: 'merge',
+                subtype: 'complete',
+                array: [...workingArray],
+                message: 'Merge Sort complete! Array is now sorted'
+            });
+
+            return { steps, sortedArray: workingArray };
+        }
+
+        // Check if array is sorted
+        function isSorted(arr) {
+            for (let i = 0; i < arr.length - 1; i++) {
+                if (arr[i] > arr[i + 1]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        // Start search
+        function startSearch() {
+            targetValue = parseInt(document.getElementById('targetValue').value);
+
+            if (currentMode === 'manual') {
+                startManualSearch();
+            } else if (currentMode === 'visualization') {
+                startVisualization();
+            } else if (currentMode === 'comparison') {
+                startComparison();
+            } else if (currentMode === 'analytics') {
+                showAnalytics();
+            }
+        }
+
+        // Manual search mode
+        function startManualSearch() {
+            manualSearchActive = true;
+            userClickCount = 0;
+            const result = binarySearchSteps(currentArray, targetValue);
+            const optimalClicks = result.steps.length;
+
+            document.getElementById('userClicks').textContent = '0';
+            document.getElementById('optimalClicks').textContent = optimalClicks;
+            document.getElementById('efficiency').textContent = '-';
+
+            renderArray();
+        }
+
+        function handleManualClick(index) {
+            if (!manualSearchActive) return;
+
+            userClickCount++;
+            document.getElementById('userClicks').textContent = userClickCount;
+
+            const clickedValue = currentArray[index];
+
+            if (clickedValue === targetValue) {
+                manualSearchActive = false;
+                const result = binarySearchSteps(currentArray, targetValue);
+                const optimalClicks = result.steps.length;
+                const efficiency = Math.round((optimalClicks / userClickCount) * 100);
+
+                document.getElementById('efficiency').textContent = efficiency + '%';
+
+                renderArray({ found: index });
+
+                const message = efficiency >= 90
+                    ? `🎉 Excellent! You found it in ${userClickCount} clicks with ${efficiency}% efficiency!`
+                    : efficiency >= 70
+                    ? `👍 Good job! You found it in ${userClickCount} clicks. Optimal was ${optimalClicks}.`
+                    : `✅ You found it! But you used ${userClickCount} clicks vs optimal ${optimalClicks}. Try the visualization to see the optimal path.`;
+
+                setTimeout(() => alert(message), 100);
+            } else {
+                const hint = clickedValue < targetValue
+                    ? `${clickedValue} is too small. Try higher!`
+                    : `${clickedValue} is too large. Try lower!`;
+
+                const infoBox = document.querySelector('#manualMode .info-box');
+                infoBox.innerHTML = `<strong>🎯 Your Mission:</strong> ${hint} (Clicks: ${userClickCount})`;
+            }
+        }
+
+        // Visualization mode
+        function startVisualization() {
+            if (visualizationSubMode === 'comparison') {
+                // Comparison mode: run all three sorting algorithms
+                startSortComparison();
+                return;
+            }
+
+            if (autoPlayEnabled) {
+                // Multi-phase workflow: shuffle → sort → search
+                allPhaseSteps = [];
+                phaseTransitions = {};
+                let stepCount = 0;
+
+                // Phase 1: Shuffle (if array is sorted)
+                if (isSorted(currentArray)) {
+                    const shuffleResult = shuffleArraySteps(currentArray);
+                    allPhaseSteps.push(...shuffleResult.steps);
+                    phaseTransitions.shuffle = { start: 0, end: shuffleResult.steps.length - 1 };
+                    stepCount = shuffleResult.steps.length;
+                    currentArray = shuffleResult.finalArray;
+                } else {
+                    phaseTransitions.shuffle = { start: -1, end: -1 };
+                }
+
+                // Phase 2: Sort with selected algorithm
+                const sortResult = getSortSteps(currentArray, selectedSortAlgorithm);
+                allPhaseSteps.push(...sortResult.steps);
+                phaseTransitions.sort = { start: stepCount, end: stepCount + sortResult.steps.length - 1 };
+                stepCount += sortResult.steps.length;
+                currentArray = sortResult.sortedArray;
+
+                // Phase 3: Binary Search
+                const searchResult = binarySearchSteps(currentArray, targetValue);
+                allPhaseSteps.push(...searchResult.steps);
+                phaseTransitions.search = { start: stepCount, end: stepCount + searchResult.steps.length - 1 };
+
+                searchSteps = allPhaseSteps;
+                currentStep = 0;
+                renderUnifiedStep(currentStep);
+
+                // Auto-start playback
+                setTimeout(() => togglePlayPause(), 300);
+            } else {
+                // Standard binary search only
+                const result = binarySearchSteps(currentArray, targetValue);
+                searchSteps = result.steps;
+                currentStep = 0;
+                renderStep(currentStep);
+            }
+        }
+
+        // Get sort steps based on selected algorithm
+        function getSortSteps(arr, algorithm) {
+            switch (algorithm) {
+                case 'bubble':
+                    return bubbleSortSteps(arr);
+                case 'quick':
+                    return quickSortSteps(arr);
+                case 'merge':
+                    return mergeSortSteps(arr);
+                default:
+                    return quickSortSteps(arr);
+            }
+        }
+
+        // Start sort comparison mode
+        async function startSortComparison() {
+            // Reset counters
+            sortStats = {
+                bubble: { comparisons: 0, swaps: 0, passes: 0 },
+                quick: { comparisons: 0, swaps: 0, partitions: 0 },
+                merge: { comparisons: 0, moves: 0, splits: 0 }
+            };
+
+            // Get steps for all algorithms
+            const bubbleResult = bubbleSortSteps([...currentArray]);
+            const quickResult = quickSortSteps([...currentArray]);
+            const mergeResult = mergeSortSteps([...currentArray]);
+
+            // Count operations
+            countOperations(bubbleResult.steps, 'bubble');
+            countOperations(quickResult.steps, 'quick');
+            countOperations(mergeResult.steps, 'merge');
+
+            // Update displays
+            document.getElementById('bubbleCompCount').textContent = sortStats.bubble.comparisons;
+            document.getElementById('bubbleSwapCount').textContent = sortStats.bubble.swaps;
+            document.getElementById('quickCompCount').textContent = sortStats.quick.comparisons;
+            document.getElementById('quickSwapCount').textContent = sortStats.quick.swaps;
+            document.getElementById('mergeCompCount').textContent = sortStats.merge.comparisons;
+            document.getElementById('mergeMoveCount').textContent = sortStats.merge.moves;
+
+            // Animate all three simultaneously
+            const maxSteps = Math.max(bubbleResult.steps.length, quickResult.steps.length, mergeResult.steps.length);
+            const speed = animationSpeed;
+
+            for (let i = 0; i < maxSteps; i++) {
+                await new Promise(resolve => setTimeout(resolve, speed));
+
+                if (i < bubbleResult.steps.length) {
+                    renderComparisonSort('bubble', bubbleResult.steps[i]);
+                }
+                if (i < quickResult.steps.length) {
+                    renderComparisonSort('quick', quickResult.steps[i]);
+                }
+                if (i < mergeResult.steps.length) {
+                    renderComparisonSort('merge', mergeResult.steps[i]);
+                }
+            }
+
+            // Determine winner
+            const winner = determineWinner();
+            document.getElementById(winner + 'Winner').innerHTML = '<span class="winner-badge">Winner!</span>';
+        }
+
+        // Count operations in sort steps
+        function countOperations(steps, algorithm) {
+            steps.forEach(step => {
+                if (step.subtype === 'compare') {
+                    sortStats[algorithm].comparisons++;
+                }
+                if (step.subtype === 'swap' || step.swapIndices) {
+                    if (algorithm === 'merge') {
+                        sortStats[algorithm].moves++;
+                    } else {
+                        sortStats[algorithm].swaps++;
+                    }
+                }
+                if (step.subtype === 'place') {
+                    sortStats[algorithm].moves++;
+                }
+            });
+        }
+
+        // Render comparison sort array
+        function renderComparisonSort(algorithm, stepData) {
+            const arrayId = algorithm + 'CompArray';
+            const display = document.getElementById(arrayId);
+            if (!display) return;
+
+            display.innerHTML = '';
+            const arr = stepData.array || currentArray;
+
+            arr.forEach((value, index) => {
+                const element = document.createElement('div');
+                element.className = 'comparison-mini-element';
+                element.textContent = value;
+
+                // Apply highlighting based on step type
+                if (stepData.comparing && stepData.comparing.includes(index)) {
+                    element.style.background = '#fef3c7';
+                    element.style.borderColor = '#f59e0b';
+                }
+                if (stepData.swapIndices && stepData.swapIndices.includes(index)) {
+                    element.style.background = '#fbbf24';
+                    element.style.borderColor = '#f59e0b';
+                }
+                if (stepData.pivot === index) {
+                    element.style.background = '#f97316';
+                    element.style.borderColor = '#ea580c';
+                    element.style.color = 'white';
+                }
+                if (stepData.placeIndex === index) {
+                    element.style.background = '#c084fc';
+                    element.style.borderColor = '#a855f7';
+                }
+                if (stepData.subtype === 'complete') {
+                    element.style.background = '#86efac';
+                    element.style.borderColor = '#10b981';
+                }
+
+                display.appendChild(element);
+            });
+        }
+
+        // Determine winner in comparison
+        function determineWinner() {
+            const totalOps = {
+                bubble: sortStats.bubble.comparisons + sortStats.bubble.swaps,
+                quick: sortStats.quick.comparisons + sortStats.quick.swaps,
+                merge: sortStats.merge.comparisons + sortStats.merge.moves
+            };
+
+            let minOps = Infinity;
+            let winner = 'quick';
+
+            Object.keys(totalOps).forEach(alg => {
+                if (totalOps[alg] < minOps) {
+                    minOps = totalOps[alg];
+                    winner = alg;
+                }
+            });
+
+            return winner;
+        }
+
+        function renderStep(step) {
+            if (step < 0 || step >= searchSteps.length) return;
+
+            const stepData = searchSteps[step];
+            currentStep = step;
+
+            const highlights = {
+                left: stepData.left,
+                right: stepData.right,
+                mid: stepData.mid,
+                inRange: true,
+                outRange: true,
+                current: stepData.mid,
+                found: stepData.action === 'found' ? stepData.mid : undefined
+            };
+
+            renderArray(highlights);
+
+            const info = document.getElementById('stepInfo');
+            info.className = 'info-box';
+            if (stepData.action === 'found') {
+                info.className = 'info-box success';
+            } else if (stepData.action === 'not found') {
+                info.className = 'info-box error';
+            }
+            info.innerHTML = `<strong>Step ${step + 1}/${searchSteps.length}:</strong> ${stepData.message}`;
+        }
+
+        // Unified render function for multi-phase workflow
+        function renderUnifiedStep(step) {
+            if (step < 0 || step >= searchSteps.length) return;
+
+            const stepData = searchSteps[step];
+            currentStep = step;
+
+            // Determine current phase
+            let phase = '';
+            let phaseNum = 1;
+            let totalPhases = 3;
+
+            if (phaseTransitions.shuffle.start !== -1 && step <= phaseTransitions.shuffle.end) {
+                phase = 'Shuffling array';
+                phaseNum = 1;
+            } else if (step >= phaseTransitions.sort.start && step <= phaseTransitions.sort.end) {
+                phase = 'Sorting with Quick Sort';
+                phaseNum = phaseTransitions.shuffle.start !== -1 ? 2 : 1;
+                totalPhases = phaseTransitions.shuffle.start !== -1 ? 3 : 2;
+            } else {
+                phase = 'Searching with Binary Search';
+                phaseNum = totalPhases;
+            }
+
+            // Prepare highlights based on step type
+            let highlights = {};
+            let displayArray = stepData.array || currentArray;
+
+            if (stepData.type === 'shuffle') {
+                highlights = {
+                    swapIndices: stepData.swapIndices
+                };
+            } else if (stepData.type === 'sort') {
+                highlights = {
+                    pivot: stepData.pivot,
+                    swapIndices: stepData.swapIndices,
+                    comparing: stepData.comparing,
+                    partitionLow: stepData.low,
+                    partitionHigh: stepData.high
+                };
+            } else {
+                // Binary search step
+                highlights = {
+                    left: stepData.left,
+                    right: stepData.right,
+                    mid: stepData.mid,
+                    inRange: true,
+                    outRange: true,
+                    current: stepData.mid,
+                    found: stepData.action === 'found' ? stepData.mid : undefined
+                };
+            }
+
+            // Render array with appropriate highlights
+            const tempArray = currentArray;
+            currentArray = displayArray;
+            renderArray(highlights);
+            currentArray = tempArray;
+
+            // Update info box
+            const info = document.getElementById('stepInfo');
+            info.className = 'info-box';
+
+            if (stepData.action === 'found' || stepData.subtype === 'complete') {
+                info.className = 'info-box success';
+            } else if (stepData.action === 'not found') {
+                info.className = 'info-box error';
+            }
+
+            info.innerHTML = `<strong>Phase ${phaseNum}/${totalPhases}: ${phase}</strong><br>` +
+                           `Step ${step + 1}/${searchSteps.length}: ${stepData.message}`;
+        }
+
+        function stepForward() {
+            if (currentStep < searchSteps.length - 1) {
+                const nextStep = currentStep + 1;
+                if (allPhaseSteps.length > 0) {
+                    renderUnifiedStep(nextStep);
+                } else {
+                    renderStep(nextStep);
+                }
+            }
+        }
+
+        function stepBackward() {
+            if (currentStep > 0) {
+                const prevStep = currentStep - 1;
+                if (allPhaseSteps.length > 0) {
+                    renderUnifiedStep(prevStep);
+                } else {
+                    renderStep(prevStep);
+                }
+            }
+        }
+
+        function togglePlayPause() {
+            if (searchSteps.length === 0) {
+                startVisualization();
+                return;
+            }
+
+            isPlaying = !isPlaying;
+            const btn = document.getElementById('playPauseBtn');
+
+            if (isPlaying) {
+                btn.textContent = '⏸ Pause';
+                playInterval = setInterval(() => {
+                    if (currentStep < searchSteps.length - 1) {
+                        stepForward();
+                    } else {
+                        togglePlayPause();
+                    }
+                }, animationSpeed);
+            } else {
+                btn.textContent = '▶️ Play';
+                clearInterval(playInterval);
+            }
+        }
+
+        function updateSpeed() {
+            const speed = parseInt(document.getElementById('speedControl').value);
+            animationSpeed = 2000 / speed;
+            document.getElementById('speedLabel').textContent = (speed / 5).toFixed(1) + 'x';
+
+            if (isPlaying) {
+                clearInterval(playInterval);
+                playInterval = setInterval(() => {
+                    if (currentStep < searchSteps.length - 1) {
+                        stepForward();
+                    } else {
+                        togglePlayPause();
+                    }
+                }, animationSpeed);
+            }
+        }
+
+        // Toggle auto-play feature
+        function toggleAutoPlay() {
+            autoPlayEnabled = !autoPlayEnabled;
+            const checkbox = document.getElementById('autoPlayCheckbox');
+            const toggle = document.getElementById('autoPlayToggle');
+
+            checkbox.checked = autoPlayEnabled;
+
+            if (autoPlayEnabled) {
+                toggle.classList.add('enabled');
+            } else {
+                toggle.classList.remove('enabled');
+            }
+        }
+
+        // Algorithm selection
+        function selectAlgorithm(algorithm) {
+            selectedSortAlgorithm = algorithm;
+
+            // Update tab UI
+            document.querySelectorAll('.algorithm-tab').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(algorithm + 'Tab').classList.add('active');
+
+            // Update complexity display
+            updateComplexityInfo();
+
+            // Reset if already running
+            if (searchSteps.length > 0) {
+                resetSearch();
+            }
+        }
+
+        // Visualization mode toggle
+        function setVisualizationSubMode(mode) {
+            visualizationSubMode = mode;
+
+            // Show/hide appropriate panels
+            const statsPanel = document.getElementById('sortStatsPanel');
+            const comparisonContainer = document.getElementById('sortComparisonContainer');
+
+            if (mode === 'individual') {
+                if (statsPanel) statsPanel.style.display = 'grid';
+                if (comparisonContainer) comparisonContainer.style.display = 'none';
+            } else {
+                if (statsPanel) statsPanel.style.display = 'none';
+                if (comparisonContainer) {
+                    comparisonContainer.style.display = 'grid';
+                } else {
+                    // Create comparison container if it doesn't exist
+                    createComparisonContainer();
+                }
+            }
+
+            resetSearch();
+        }
+
+        // Update complexity information
+        function updateComplexityInfo() {
+            const complexities = {
+                bubble: 'O(n²)',
+                quick: 'O(n log n)',
+                merge: 'O(n log n)'
+            };
+
+            const complexityEl = document.getElementById('sortComplexity');
+            if (complexityEl) {
+                complexityEl.textContent = complexities[selectedSortAlgorithm] || '-';
+            }
+        }
+
+        // Create comparison container dynamically
+        function createComparisonContainer() {
+            const vizMode = document.getElementById('visualizationMode');
+            const playbackControls = vizMode.querySelector('.playback-controls');
+
+            let container = document.getElementById('sortComparisonContainer');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'sortComparisonContainer';
+                container.className = 'sort-comparison-container';
+                container.innerHTML = `
+                    <div class="sort-comparison-panel">
+                        <h4>🫧 Bubble Sort <span id="bubbleWinner"></span></h4>
+                        <div class="stat-card-small">
+                            <div class="stat-label-small">Comparisons</div>
+                            <div class="stat-value-small" id="bubbleCompCount">0</div>
+                        </div>
+                        <div class="stat-card-small">
+                            <div class="stat-label-small">Swaps</div>
+                            <div class="stat-value-small" id="bubbleSwapCount">0</div>
+                        </div>
+                        <div class="sort-comparison-array" id="bubbleCompArray"></div>
+                    </div>
+                    <div class="sort-comparison-panel">
+                        <h4>⚡ Quick Sort <span id="quickWinner"></span></h4>
+                        <div class="stat-card-small">
+                            <div class="stat-label-small">Comparisons</div>
+                            <div class="stat-value-small" id="quickCompCount">0</div>
+                        </div>
+                        <div class="stat-card-small">
+                            <div class="stat-label-small">Swaps</div>
+                            <div class="stat-value-small" id="quickSwapCount">0</div>
+                        </div>
+                        <div class="sort-comparison-array" id="quickCompArray"></div>
+                    </div>
+                    <div class="sort-comparison-panel">
+                        <h4>🔀 Merge Sort <span id="mergeWinner"></span></h4>
+                        <div class="stat-card-small">
+                            <div class="stat-label-small">Comparisons</div>
+                            <div class="stat-value-small" id="mergeCompCount">0</div>
+                        </div>
+                        <div class="stat-card-small">
+                            <div class="stat-label-small">Moves</div>
+                            <div class="stat-value-small" id="mergeMoveCount">0</div>
+                        </div>
+                        <div class="sort-comparison-array" id="mergeCompArray"></div>
+                    </div>
+                `;
+                vizMode.insertBefore(container, playbackControls);
+            }
+            container.style.display = 'grid';
+        }
+
+        // Comparison mode
+        async function startComparison() {
+            const binaryResult = binarySearchSteps(currentArray, targetValue);
+            const linearResult = linearSearchSteps(currentArray, targetValue);
+
+            document.getElementById('binaryComparisons').textContent = '0';
+            document.getElementById('linearComparisons').textContent = '0';
+
+            // Animate both searches
+            const speed = 500;
+
+            for (let i = 0; i < Math.max(binaryResult.steps.length, linearResult.steps.length); i++) {
+                await new Promise(resolve => setTimeout(resolve, speed));
+
+                // Update binary search
+                if (i < binaryResult.steps.length) {
+                    document.getElementById('binaryComparisons').textContent = i + 1;
+                    renderComparisonArray('binary', binaryResult.steps[i]);
+                }
+
+                // Update linear search
+                if (i < linearResult.steps.length) {
+                    document.getElementById('linearComparisons').textContent = i + 1;
+                    renderComparisonArray('linear', linearResult.steps[i]);
+                }
+            }
+        }
+
+        function renderComparisonArray(type, stepData) {
+            const display = document.getElementById(type + 'Array');
+            display.innerHTML = '';
+
+            currentArray.forEach((value, index) => {
+                const element = document.createElement('div');
+                element.className = 'array-element';
+                element.textContent = value;
+                element.style.width = '50px';
+                element.style.height = '50px';
+                element.style.fontSize = '0.9em';
+
+                if (type === 'binary') {
+                    if (stepData.mid === index) {
+                        element.classList.add('current');
+                    }
+                    if (stepData.action === 'found' && stepData.mid === index) {
+                        element.classList.add('found');
+                    }
+                    if (index >= stepData.left && index <= stepData.right) {
+                        element.classList.add('in-range');
+                    } else {
+                        element.classList.add('out-range');
+                    }
+                } else {
+                    if (stepData.index === index) {
+                        if (stepData.found) {
+                            element.classList.add('found');
+                        } else {
+                            element.classList.add('current');
+                        }
+                    } else if (index < stepData.index) {
+                        element.classList.add('out-range');
+                    }
+                }
+
+                display.appendChild(element);
+            });
+        }
+
+        // Analytics mode
+        function showAnalytics() {
+            const ctx = document.getElementById('performanceChart').getContext('2d');
+
+            const sizes = [10, 50, 100, 500, 1000, 5000, 10000];
+            const binaryData = sizes.map(n => Math.ceil(Math.log2(n)));
+            const linearData = sizes.map(n => Math.ceil(n / 2));
+
+            if (chart) {
+                chart.destroy();
+            }
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: sizes,
+                    datasets: [{
+                        label: 'Binary Search O(log n)',
+                        data: binaryData,
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'Linear Search O(n)',
+                        data: linearData,
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Average Comparisons vs Array Size',
+                            font: { size: 16 }
+                        },
+                        legend: {
+                            display: true,
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Array Size'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Average Comparisons'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Mode switching
+        function setMode(mode) {
+            currentMode = mode;
+
+            // Update buttons
+            document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Show/hide content
+            document.querySelectorAll('.mode-content').forEach(content => content.classList.add('hidden'));
+            document.getElementById(mode + 'Mode').classList.remove('hidden');
+
+            resetSearch();
+        }
+
+        // Code display
+        function showCode(type) {
+            document.querySelectorAll('.code-tab').forEach(tab => tab.classList.remove('active'));
+            event.target.classList.add('active');
+            document.getElementById('codeContent').innerHTML = codeTemplates[type];
+        }
+
+        // Reset search
+        function resetSearch() {
+            manualSearchActive = false;
+            userClickCount = 0;
+            searchSteps = [];
+            currentStep = 0;
+            isPlaying = false;
+            clearInterval(playInterval);
+
+            // Clear multi-phase state
+            allPhaseSteps = [];
+            phaseTransitions = {};
+            currentPhase = null;
+
+            document.getElementById('playPauseBtn').textContent = '▶️ Play';
+            renderArray();
+
+            if (currentMode === 'manual') {
+                document.getElementById('userClicks').textContent = '0';
+                document.getElementById('optimalClicks').textContent = '-';
+                document.getElementById('efficiency').textContent = '-';
+            }
+        }
+
+        // Edge cases
+        function testUnsorted() {
+            alert('⚠️ Binary search ONLY works on sorted arrays!\n\nIf the array is unsorted, binary search will give incorrect results because it assumes elements are in order.');
+            currentArray = [45, 12, 88, 23, 67, 34, 91, 15, 56];
+            renderArray();
+            updateArrayInfo();
+        }
+
+        function testNotFound() {
+            targetValue = 999;
+            document.getElementById('targetValue').value = 999;
+            alert('🔍 Testing: Target not in array\n\nBinary search will check all possibilities and return -1 (not found).');
+            startVisualization();
+        }
+
+        function testDuplicates() {
+            currentArray = [10, 20, 30, 30, 30, 40, 50, 60];
+            renderArray();
+            updateArrayInfo();
+            alert('🔄 Arrays with duplicates\n\nBinary search will find ONE occurrence, but not necessarily the first or last. Different implementations may return different indices.');
+        }
+
+        function testBoundaries() {
+            if (currentArray.length > 0) {
+                const choice = confirm('Test first element? (OK = first, Cancel = last)');
+                targetValue = choice ? currentArray[0] : currentArray[currentArray.length - 1];
+                document.getElementById('targetValue').value = targetValue;
+                alert(`🎯 Testing boundary value: ${targetValue}\n\nBoundary conditions are important edge cases to test!`);
+                startVisualization();
+            }
+        }
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>
